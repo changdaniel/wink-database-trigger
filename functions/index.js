@@ -6,7 +6,7 @@ admin.initializeApp();
 const maxmeterdist = 100;
 const maxdegbearing = 60;
 
-exports.addMessage1 = functions.https.onCall((data, context) => {
+exports.recognizeBuilding = functions.https.onCall((data, context) => {
     
     const userlat = data.userlat;
     const userlon = data.userlon;
@@ -15,7 +15,8 @@ exports.addMessage1 = functions.https.onCall((data, context) => {
     var best_cost = Number.MAX_VALUE;
     var best_index = 0;
 
-   
+   var best_bearingdiff;
+
     var ref = admin.database().ref('Buildings');
 
       return ref.once('value').then(function(snapshot) {
@@ -28,25 +29,28 @@ exports.addMessage1 = functions.https.onCall((data, context) => {
 
                 var temp_bearingdiff = calcBearingDifference(userheading, radToDegree(calcRadBearing(userlat, userlon, templat, templon)));
 
-                if (temp_bearingdiff < 60) {
+                //if (temp_bearingdiff < 60) {
 
                     var temp_dist = calcMeterDistance(userlat, userlon, templat, templon);
 
-                    if (temp_dist < 100) {
+                    //if (temp_dist < 100) {
 
                         var temp_cost = findCost(temp_dist, temp_bearingdiff);
-                        console.info(temp_cost);
+                        //console.info(temp_cost);
 
                         if (temp_cost < best_cost) {
+                            best_bearingdiff = temp_bearingdiff;
                             best_index = tempindex;
                             best_cost = temp_cost;
                         }
-                    }
-                }
+                    //}
+                //}
         }); 
 
-        console.log(best_cost)
-        console.log(best_index)
+        console.log("User Location: " + userlat + ", "+ userlon)
+        console.log("Heading Difference" + best_bearingdiff)
+        console.log("Best Cost: " + best_cost)
+        console.log("Best Index: " + best_index)
         var ret = snapshot.child(''+best_index).val();
         console.log(ret);
         return ret;
@@ -232,8 +236,14 @@ var dist = b * A * (sigma - deltaSigma);
 return dist;
 };
 
+shiftToValidDegree = function (deg){
+
+    return ((deg % 360) + 360) % 360;
+
+}
+
 calcBearingDifference = function (userheadingdeg, degree) {
-    var degdifference = Math.abs(userheadingdeg - degree);
+    var degdifference = shiftToValidDegree(userheadingdeg - degree);
     return degdifference;
 };
 

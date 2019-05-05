@@ -33,7 +33,7 @@ exports.recognizeBuilding = functions.https.onCall((data, context) => {
 
                     var temp_dist = calcMeterDistance(userlat, userlon, templat, templon);
 
-                    //if (temp_dist < 100) {
+                    if (temp_dist < 100) {
 
                         var temp_cost = findCost(temp_dist, temp_bearingdiff);
                         //console.info(temp_cost);
@@ -43,7 +43,7 @@ exports.recognizeBuilding = functions.https.onCall((data, context) => {
                             best_index = tempindex;
                             best_cost = temp_cost;
                         }
-                    //}
+                    }
                 //}
         }); 
 
@@ -63,7 +63,7 @@ exports.recognizeBuilding = functions.https.onCall((data, context) => {
     return ref.once("value")
     .then(function(snapshot) {
 
-        var message = snapshot.child("1").child("username").val(); // "Lovelace"
+        var message = snapshot.child("1").child("username").val(); \
         
         console.log(message)
         console.log(t)
